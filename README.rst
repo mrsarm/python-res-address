@@ -1,7 +1,15 @@
 Simple Resource Address Parser
 ==============================
 
-Python module to parse simple address string. Work in progress...
+Python module to parse simple addresses strings. Work in progress...
+
+
+Run the test
+------------
+
+Just execute (Python 2 or 3)::
+
+   $ python -m unittest -v tests
 
 
 About
