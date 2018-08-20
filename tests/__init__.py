@@ -17,7 +17,7 @@
 #  GNU Lesser General Public License for more details.
 #
 #  You should have received a copy of the GNU Lesser General Public License
-#  along with this programe.  If not, see <http://www.gnu.org/licenses/>.
+#  along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
 
@@ -29,58 +29,58 @@ from res_address import *
 class TestAddresses(unittest.TestCase):
 
     def test_full_address(self):
-        host, port, dbname = get_res_address("localhost:27017/test")
+        host, port, resource = get_res_address("localhost:27017/test")
         self.assertEqual(host, 'localhost')
         self.assertEqual(port, 27017)
-        self.assertEqual(dbname, "test")
+        self.assertEqual(resource, "test")
 
-    def test_localhost_and_dbname(self):
-        host, port, dbname = get_res_address("localhost/test")
+    def test_localhost_and_resource(self):
+        host, port, resource = get_res_address("localhost/test")
         self.assertEqual(host, 'localhost')
         self.assertIsNone(port)
-        self.assertEqual(dbname, "test")
+        self.assertEqual(resource, "test")
 
-    def test_remotehost_and_dbname(self):
-        host, port, dbname = get_res_address("domain.com.ar/test")
+    def test_remotehost_and_resource(self):
+        host, port, resource = get_res_address("domain.com.ar/test")
         self.assertEqual(host, 'domain.com.ar')
         self.assertIsNone(port)
-        self.assertEqual(dbname, "test")
+        self.assertEqual(resource, "test")
 
-    def test_only_dbname(self):
-        host, port, dbname = get_res_address("test")
+    def test_only_resource(self):
+        host, port, resource = get_res_address("test")
         self.assertIsNone(host)
         self.assertIsNone(port)
-        self.assertEqual(dbname, 'test')
+        self.assertEqual(resource, 'test')
 
     def test_full_address_with_ip(self):
-        host, port, dbname = get_res_address("127.0.0.1:10001/test-prod")
+        host, port, resource = get_res_address("127.0.0.1:10001/test-prod")
         self.assertEqual(host, '127.0.0.1')
         self.assertEqual(port, 10001)
-        self.assertEqual(dbname, "test-prod")
+        self.assertEqual(resource, "test-prod")
 
-    def test_port_and_dbname(self):
-        host, port, dbname = get_res_address(":5000/test")
+    def test_port_and_resource(self):
+        host, port, resource = get_res_address(":5000/test")
         self.assertIsNone(host)
         self.assertEqual(port, 5000)
-        self.assertEqual(dbname, "test")
+        self.assertEqual(resource, "test")
 
-    def test_ip_and_dbname(self):
-        host, port, dbname = get_res_address("192.168.0.5/my_db")
+    def test_ip_and_resource(self):
+        host, port, resource = get_res_address("192.168.0.5/my_db")
         self.assertEqual(host, '192.168.0.5')
         self.assertIsNone(port)
-        self.assertEqual(dbname, "my_db")
+        self.assertEqual(resource, "my_db")
 
     def test_ipv6_address(self):
-        host, port, dbname = get_res_address("[::10]/foo10")
+        host, port, resource = get_res_address("[::10]/foo10")
         self.assertEqual(host, '[::10]')
         self.assertIsNone(port)
-        self.assertEqual(dbname, "foo10")
+        self.assertEqual(resource, "foo10")
 
     def test_full_ipv6_address(self):
-        host, port, dbname = get_res_address("[::1]:9999/foo")
+        host, port, resource = get_res_address("[::1]:9999/foo")
         self.assertEqual(host, '[::1]')
         self.assertEqual(port, 9999)
-        self.assertEqual(dbname, "foo")
+        self.assertEqual(resource, "foo")
 
 
 class TestWrongAddresses(unittest.TestCase):
@@ -91,15 +91,11 @@ class TestWrongAddresses(unittest.TestCase):
     def test_invalid_host(self):
         self.assertRaises(InvalidHostError, get_res_address, "/test")
 
-    def test_invalid_dbname(self):
-        self.assertRaises(NotDatabaseProvidedError, get_res_address, "test/")
+    def test_invalid_resource(self):
+        self.assertRaises(NotResourceProvidedError, get_res_address, "test/")
 
     def test_missed_port(self):
         self.assertRaises(InvalidPortError, get_res_address, "127.1.1.10:/test")
 
     def test_invalid_ipv6_host(self):
         self.assertRaises(InvalidHostError, get_res_address, "[:::1/test")
-
-
-if __name__ == '__main__':
-    unittest.main()

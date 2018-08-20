@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #  res-address, Simple Resource Address Parser
-#  Copyright (C) 2018i Mariano Ruiz (<https://github.com/mrsarm/python-res-address>).
+#  Copyright (C) 2018 Mariano Ruiz (<https://github.com/mrsarm/python-res-address>).
 #
 #  Author: Mariano Ruiz <mrsarm@gmail.com>
 #
@@ -17,7 +17,7 @@
 #  GNU Lesser General Public License for more details.
 #
 #  You should have received a copy of the GNU Lesser General Public License
-#  along with this programe.  If not, see <http://www.gnu.org/licenses/>.
+#  along with this library.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
 
@@ -32,20 +32,20 @@ __doc__ = """Simple Resource Address Parser."""
 def get_res_address(address):
     """
     :param address: the address, possible values are:
-        foo                   foo database on local machine (IPv4 connection)
-        192.169.0.5/foo       foo database on 192.168.0.5 machine
-        192.169.0.5:9999/foo  foo database on 192.168.0.5 machine on port 9999
-        "[::1]:9999/foo"      foo database on ::1 machine on port 9999 (IPv6 connection)
+        foo                   foo resource on local machine (IPv4 connection)
+        192.169.0.5/foo       foo resource on 192.168.0.5 machine
+        192.169.0.5:9999/foo  foo resource on 192.168.0.5 machine on port 9999
+        "[::1]:9999/foo"      foo resource on ::1 machine on port 9999 (IPv6 connection)
     :return: a tuple with ``(host, port, db name)``. If one or more value aren't in the `address`
     string, ``None`` is set in the tuple value
     """
-    host = port = dbname = None
+    host = port = resource = None
     if '/' in address:
         if address.startswith("/"):
-            raise InvalidHostError('Missed host at "%s"' % address)
+            raise InvalidHostError('Missed host at "%s"' % address, address)
         if address.endswith("/"):
-            raise NotDatabaseProvidedError('Missed dbname at "%s"' % address)
-        host, dbname = address.split('/')
+            raise NotResourceProvidedError('Missed resource at "%s"' % address, address)
+        host, resource = address.split('/')
         if host.startswith("[") and "]" in host:
             # IPv6 address
             # See http://api.mongodb.org/python/2.8/api/pymongo/connection.html
@@ -61,20 +61,20 @@ def get_res_address(address):
             try:
                 host, port = host.split(':')
             except ValueError:
-                raise InvalidHostError('Invalid host "%s"' % host)
+                raise InvalidHostError('Invalid host "%s"' % host, address, host)
         if port is not None:
             try:
                 port = int(port)
             except ValueError:
-                raise InvalidPortError('Invalid port number "%s"' % port)
+                raise InvalidPortError('Invalid port number "%s"' % port, address, port)
     else:
         if (address.startswith("[") and address.rfind("]") > address.rfind(":")) \
                 or ":" in address or "." in address:
-            raise NotDatabaseProvidedError('No database name provided in "%s"' % address)
-        dbname = address
+            raise NotResourceProvidedError('No resource name provided in "%s"' % address, address)
+        resource = address
     if host == '':
         host = None
-    return host, port, dbname
+    return host, port, resource
 
 
 #
@@ -82,20 +82,22 @@ def get_res_address(address):
 #
 
 class AddressError(ValueError):
-    def __init__(self, message):
+    def __init__(self, message, address=None, invalid_component=None):
         self.message = message
+        self.address = address
+        self.invalid_component = invalid_component
+
+    def __str__(self):
+        return self.message
 
 
 class InvalidHostError(AddressError):
-    def __init__(self, message):
-        super(InvalidHostError, self).__init__(message)
+    pass
 
 
 class InvalidPortError(AddressError):
-    def __init__(self, message):
-        super(InvalidPortError, self).__init__(message)
+    pass
 
 
-class NotDatabaseProvidedError(AddressError):
-    def __init__(self, message):
-        super(NotDatabaseProvidedError, self).__init__(message)
+class NotResourceProvidedError(AddressError):
+    pass
