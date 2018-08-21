@@ -1,7 +1,41 @@
 Simple Resource Address Parser
 ==============================
 
-Python module to parse simple addresses strings. Work in progress...
+Work in progress, not published yet ...
+
+Python module to parse simple network resource addresses, like the ones
+used in many database systems to represent a database URI.
+
+``res_address`` will be used by `Mongotail <https://github.com/mrsarm/mongotail>`_
+to parse the address passed through command line (migration in progress), but can be used
+by any other Python application that need to parse a MongoDB database address,
+or any other network resource like ``[[HOST OR IP][:PORT]/]RESOURCE``.
+
+Usage::
+
+   >>> from res_address import get_res_address
+   >>> host, port, resource = get_res_address("localhost:27017/test")
+   >>> print(host, port, resource)
+   localhost 27017 test
+   >>> host, port, resource = get_res_address("my_db")
+   >>> print(host, port, resource)
+   None None my_db
+
+
+
+The address can be:
+
++----------------------+-------------------------------------------------------------+
+| foo                  | foo resource on local machine (IPv4 connection)             |
++----------------------+-------------------------------------------------------------+
+| 192.169.0.5/foo      | foo resource on 192.168.0.5 machine                         |
++----------------------+-------------------------------------------------------------+
+| remotehost/foo       | foo resource on *remotehost* machine                        |
++----------------------+-------------------------------------------------------------+
+| 192.169.0.5:9999/foo | foo resource on 192.168.0.5 machine on port 9999            |
++----------------------+-------------------------------------------------------------+
+| "[::1]:9999/foo"     | foo resource on ::1 machine on port 9999 (IPv6 connection)  |
++----------------------+-------------------------------------------------------------+
 
 
 Run the test
