@@ -8,7 +8,7 @@ used in many database systems to represent a database URI.
 
 ``res_address`` will be used by `Mongotail <https://github.com/mrsarm/mongotail>`_
 to parse the address passed through command line (migration in progress), but can be used
-by any other Python application that need to parse a MongoDB database address,
+by any other Python application that needs to parse a MongoDB database address,
 or any other network resource like ``[[HOST OR IP][:PORT]/]RESOURCE``.
 
 Usage::
@@ -36,6 +36,26 @@ The address can be:
 +----------------------+-------------------------------------------------------------+
 | "[::1]:9999/foo"     | foo resource on ::1 machine on port 9999 (IPv6 connection)  |
 +----------------------+-------------------------------------------------------------+
+| :1234/foo            | foo resource on port 1234                                   |
++----------------------+-------------------------------------------------------------+
+
+Some validations over the host, port and resources strings are performed, and an
+exception is launched if some of the checks fail, but take into account that validations
+invalid range IPs or incompatible resource names can be passed.::
+
+   >>> host, port, resource = get_res_address("localhost:INVALIDport/test")
+   Traceback (most recent call last):
+     File "<stdin>", line 1, in <module>
+     File "res_address/__init__.py", line 74, in get_res_address
+       raise InvalidPortError('Invalid port number "%s"' % port, address, port)
+   res_address.InvalidPortError: Invalid port number "INVALIDport"
+
+All the validation exceptions inherit from ``AddressError``:
+
+* ``InvalidHostError``
+* ``InvalidPortError``
+* ``InvalidResourceError``
+* ``NotResourceProvidedError``
 
 
 Run the test
@@ -51,6 +71,6 @@ About
 
 Project: https://github.com/mrsarm/python-res-address
 
-Authors: (2018) Mariano Ruiz <mrsarm@gmail.cm>
+Authors: (2018-2019) Mariano Ruiz <mrsarm@gmail.cm>
 
 License: LGPL-3

@@ -2,7 +2,8 @@
 ##############################################################################
 #
 #  res-address, Simple Resource Address Parser
-#  Copyright (C) 2018 Mariano Ruiz (<https://github.com/mrsarm/python-res-address>).
+#  Copyright (C) 2018-2019 Mariano Ruiz
+#  https://github.com/mrsarm/python-res-address
 #
 #  Author: Mariano Ruiz <mrsarm@gmail.com>
 #
@@ -88,14 +89,40 @@ class TestWrongAddresses(unittest.TestCase):
     def test_invalid_port(self):
         self.assertRaises(InvalidPortError, get_res_address, "localhost:NotANumber/test")
 
-    def test_invalid_host(self):
+    def test_empty_host(self):
         self.assertRaises(InvalidHostError, get_res_address, "/test")
 
-    def test_invalid_resource(self):
+    def test_invalid_host(self):
+        self.assertRaises(InvalidHostError, get_res_address, "!/test")
+        self.assertRaises(InvalidHostError, get_res_address, "!qwerty/test")
+
+    def test_not_resource(self):
         self.assertRaises(NotResourceProvidedError, get_res_address, "test/")
+        self.assertRaises(NotResourceProvidedError, get_res_address, "localhost:123/")
 
     def test_missed_port(self):
         self.assertRaises(InvalidPortError, get_res_address, "127.1.1.10:/test")
 
     def test_invalid_ipv6_host(self):
         self.assertRaises(InvalidHostError, get_res_address, "[:::1/test")
+
+    def test_invalid_chars_ipv6_host(self):
+        self.assertRaises(InvalidHostError, get_res_address, "[:::1::xxx]/test")
+        self.assertRaises(InvalidHostError, get_res_address, "[:::1:: ]:234/test")
+
+    def test_port_with_invalid_chars(self):
+        self.assertRaises(InvalidPortError, get_res_address, "localhost:a98/test")
+
+    def test_port_with_spaces(self):
+        self.assertRaises(InvalidPortError, get_res_address, "localhost: 98/test")
+
+    def test_port_too_high_number(self):
+        self.assertRaises(InvalidPortError, get_res_address, "localhost:70000/test")
+
+    def test_resource_with_spaces(self):
+        self.assertRaises(InvalidResourceError, get_res_address, "test/The Resource")
+        self.assertRaises(InvalidResourceError, get_res_address, "localhost:123/ test")
+
+    def test_invalid_resource(self):
+        self.assertRaises(InvalidResourceError, get_res_address, "localhost:123/!name")
+        self.assertRaises(InvalidResourceError, get_res_address, "$$")

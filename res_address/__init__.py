@@ -2,7 +2,8 @@
 ##############################################################################
 #
 #  res-address, Simple Resource Address Parser
-#  Copyright (C) 2018 Mariano Ruiz (<https://github.com/mrsarm/python-res-address>).
+#  Copyright (C) 2018-2019 Mariano Ruiz
+#  https://github.com/mrsarm/python-res-address
 #
 #  Author: Mariano Ruiz <mrsarm@gmail.com>
 #
@@ -23,10 +24,13 @@
 
 
 __author__ = 'Mariano Ruiz'
-__version__ = '1.0.0-b1'
+__version__ = '1.0.0-b2'
 __license__ = 'LGPL-3'
 __url__ = 'https://github.com/mrsarm/python-res-address'
 __doc__ = """Simple Resource Address Parser."""
+
+
+import re
 
 
 def get_res_address(address):
@@ -40,6 +44,7 @@ def get_res_address(address):
     string, ``None`` is set in the tuple value
     """
     host = port = resource = None
+    is_ipv6 = False
     if '/' in address:
         if address.startswith("/"):
             raise InvalidHostError('Missed host at "%s"' % address, address)
@@ -47,15 +52,13 @@ def get_res_address(address):
             raise NotResourceProvidedError('Missed resource at "%s"' % address, address)
         host, resource = address.split('/')
         if host.startswith("[") and "]" in host:
+            is_ipv6 = True
             # IPv6 address
-            # See http://api.mongodb.org/python/2.8/api/pymongo/connection.html
-            # If the connection is refused, you have to ensure that `mongod`
-            # is running with `--ipv6` option enabled, and "bind_ip" value are
-            # disabled in `mongod.conf`, or is enabled with your
-            # IPv6 address in the list.
             if "]:" in host:
                 port = host[host.index("]:")+2:]
                 host = host[:host.index("]:")+1]
+            if not re.compile(r'^\[[\d:a-h]+\]').search(host):
+                raise InvalidHostError('Invalid host "%s"' % host, address, host)
         elif ':' in host:
             # IPv4 address
             try:
@@ -63,9 +66,11 @@ def get_res_address(address):
             except ValueError:
                 raise InvalidHostError('Invalid host "%s"' % host, address, host)
         if port is not None:
-            try:
+            if re.compile(r'^\d{1,5}$').search(port):
                 port = int(port)
-            except ValueError:
+                if port > 65535:
+                    raise InvalidPortError('Too high port number "%s"' % port, address, port)
+            else:
                 raise InvalidPortError('Invalid port number "%s"' % port, address, port)
     else:
         if (address.startswith("[") and address.rfind("]") > address.rfind(":")) \
@@ -74,6 +79,10 @@ def get_res_address(address):
         resource = address
     if host == '':
         host = None
+    elif host and not is_ipv6 and not re.compile(r'^[\w\-_.]+$').search(host):
+        raise InvalidHostError('Invalid host "%s"' % host, address, host)
+    if not re.compile(r'^[\w\-_]+$').search(resource):
+        raise InvalidResourceError('Invalid resource "%s"' % resource, address, resource)
     return host, port, resource
 
 
@@ -96,6 +105,10 @@ class InvalidHostError(AddressError):
 
 
 class InvalidPortError(AddressError):
+    pass
+
+
+class InvalidResourceError(AddressError):
     pass
 
 
