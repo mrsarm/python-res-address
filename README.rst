@@ -39,9 +39,9 @@ The address can be:
 | :1234/foo            | foo resource on port 1234                                   |
 +----------------------+-------------------------------------------------------------+
 
-Some validations over the host, port and resources strings are performed, and an
-exception is launched if some of the checks fail, but take into account that validations
-invalid range IPs or incompatible resource names can be passed.::
+Some validations over the host, port and resource strings are performed, and an
+exception is launched if some of the checks fails, but take into account that
+invalid range IPs or incompatible resource names may pass.::
 
    >>> host, port, resource = get_res_address("localhost:INVALIDport/test")
    Traceback (most recent call last):
