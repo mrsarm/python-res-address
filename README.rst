@@ -63,6 +63,11 @@ Run the test
 
 Just execute (Python 2 or 3)::
 
+   $ python setup.py test
+
+
+Or::
+
    $ python -m unittest -v tests
 
 
