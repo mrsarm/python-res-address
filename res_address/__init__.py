@@ -77,11 +77,15 @@ def get_res_address(address):
                 or ":" in address or "." in address:
             raise NotResourceProvidedError('No resource name provided in "%s"' % address, address)
         resource = address
-    if host == '':
+    if not host:
         host = None
-    elif host and not is_ipv6 and not re.compile(r'^[\w\-_.]+$').search(host):
-        raise InvalidHostError('Invalid host "%s"' % host, address, host)
+    else:
+        if (not is_ipv6 and not re.compile(r'^\w[\w\-_.]*$').search(host)) or \
+                re.compile(r'^[0-9]+$').search(host):
+            raise InvalidHostError('Invalid host "%s"' % host, address, host)
     if not re.compile(r'^[\w\-_]+$').search(resource):
+        raise InvalidResourceError('Invalid resource "%s"' % resource, address, resource)
+    if not re.compile(r'[a-zA-Z]').search(resource):    # At least one latter
         raise InvalidResourceError('Invalid resource "%s"' % resource, address, resource)
     return host, port, resource
 

@@ -95,6 +95,8 @@ class TestWrongAddresses(unittest.TestCase):
     def test_invalid_host(self):
         self.assertRaises(InvalidHostError, get_res_address, "!/test")
         self.assertRaises(InvalidHostError, get_res_address, "!qwerty/test")
+        self.assertRaises(InvalidHostError, get_res_address, "./test")
+        self.assertRaises(InvalidHostError, get_res_address, "1000/test")
 
     def test_not_resource(self):
         self.assertRaises(NotResourceProvidedError, get_res_address, "test/")
@@ -126,3 +128,5 @@ class TestWrongAddresses(unittest.TestCase):
     def test_invalid_resource(self):
         self.assertRaises(InvalidResourceError, get_res_address, "localhost:123/!name")
         self.assertRaises(InvalidResourceError, get_res_address, "$$")
+        self.assertRaises(InvalidResourceError, get_res_address, "1234")
+        #self.assertRaises(InvalidResourceError, get_res_address, "1234/test")
