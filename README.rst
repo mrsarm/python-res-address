@@ -20,6 +20,9 @@ Usage::
    >>> host, port, resource = get_res_address("my_db")
    >>> print(host, port, resource)
    None None my_db
+   >>> ipv6, port, resource = get_res_address("[::1]:9999/foo")
+   >>> print(ipv6, port, resource)
+   [::1] 9999 foo
 
 
 

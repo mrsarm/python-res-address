@@ -76,6 +76,22 @@ class TestAddresses(unittest.TestCase):
         self.assertEqual(host, '[::10]')
         self.assertIsNone(port)
         self.assertEqual(resource, "foo10")
+        host, port, resource = get_res_address("[2001:0db8:0000:0000:0000:ff00:0042:8329]/foo10")
+        self.assertEqual(host, '[2001:0db8:0000:0000:0000:ff00:0042:8329]')
+        self.assertIsNone(port)
+        self.assertEqual(resource, "foo10")
+
+    def test_ipv6_upper_case_address(self):
+        host, port, resource = get_res_address("[2001:0DB8:0000:0000:0000:FF00:0042:8329]/TEST")
+        self.assertEqual(host, '[2001:0DB8:0000:0000:0000:FF00:0042:8329]')
+        self.assertIsNone(port)
+        self.assertEqual(resource, "TEST")
+
+    def test_ipv4_mapped_ipv6_address(self):
+        host, port, resource = get_res_address("[::ffff:192.168.89.9]/test")
+        self.assertEqual(host, '[::ffff:192.168.89.9]')
+        self.assertIsNone(port)
+        self.assertEqual(resource, "test")
 
     def test_full_ipv6_address(self):
         host, port, resource = get_res_address("[::1]:9999/foo")
@@ -129,4 +145,3 @@ class TestWrongAddresses(unittest.TestCase):
         self.assertRaises(InvalidResourceError, get_res_address, "localhost:123/!name")
         self.assertRaises(InvalidResourceError, get_res_address, "$$")
         self.assertRaises(InvalidResourceError, get_res_address, "1234")
-        #self.assertRaises(InvalidResourceError, get_res_address, "1234/test")

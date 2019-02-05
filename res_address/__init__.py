@@ -57,7 +57,7 @@ def get_res_address(address):
             if "]:" in host:
                 port = host[host.index("]:")+2:]
                 host = host[:host.index("]:")+1]
-            if not re.compile(r'^\[[\d:a-h]+\]').search(host):
+            if not re.compile(r'^\[[\d:a-fA-F][\d:.a-fA-F]+\]').search(host):     # IPv6 and IPv4-mapped IPv6 addresses
                 raise InvalidHostError('Invalid host "%s"' % host, address, host)
         elif ':' in host:
             # IPv4 address
