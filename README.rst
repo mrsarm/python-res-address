@@ -11,7 +11,9 @@ to parse the address passed through command line (migration in progress), but ca
 by any other Python application that needs to parse a MongoDB database address,
 or any other network resource like ``[[HOST OR IP][:PORT]/]RESOURCE``.
 
-Usage::
+Usage:
+
+.. code:: python
 
    >>> from res_address import get_res_address
    >>> host, port, resource = get_res_address("localhost:27017/test")
@@ -44,7 +46,9 @@ The address can be:
 
 Some validations over the host, port and resource strings are performed, and an
 exception is launched if some of the checks fails, but take into account that
-invalid range IPs or incompatible resource names may pass.::
+invalid range IPs or incompatible resource names may pass.:
+
+.. code:: python
 
    >>> host, port, resource = get_res_address("localhost:INVALIDport/test")
    Traceback (most recent call last):
