@@ -145,3 +145,6 @@ class TestWrongAddresses(unittest.TestCase):
         self.assertRaises(InvalidResourceError, get_res_address, "localhost:123/!name")
         self.assertRaises(InvalidResourceError, get_res_address, "$$")
         self.assertRaises(InvalidResourceError, get_res_address, "1234")
+
+    def test_invalid_double_resource(self):
+        self.assertRaises(AddressError, get_res_address, "localhost:123/name/secondname")

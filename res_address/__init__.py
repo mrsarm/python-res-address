@@ -50,7 +50,10 @@ def get_res_address(address):
             raise InvalidHostError('Missed host at "%s"' % address, address)
         if address.endswith("/"):
             raise NotResourceProvidedError('Missed resource at "%s"' % address, address)
-        host, resource = address.split('/')
+        try:
+            host, resource = address.split('/')
+        except ValueError:
+            raise AddressError('Invalid address "%s"' % address, address, resource)
         if host.startswith("[") and "]" in host:
             is_ipv6 = True
             # IPv6 address
