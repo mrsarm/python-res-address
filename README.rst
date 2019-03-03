@@ -1,8 +1,6 @@
 Simple Resource Address Parser
 ==============================
 
-Work in progress, not published yet ...
-
 Python module to parse simple network resource addresses, like the ones
 used in many database systems to represent a database URI.
 
@@ -44,9 +42,9 @@ The address can be:
 | :1234/foo            | foo resource on port 1234                                   |
 +----------------------+-------------------------------------------------------------+
 
-Some validations over the host, port and resource strings are performed, and an
+Some validations are performed over the host, port and resource strings, and an
 exception is launched if some of the checks fails, but take into account that
-invalid range IPs or incompatible resource names may pass.:
+invalid range IPs or incompatible resource names may pass:
 
 .. code:: python
 
