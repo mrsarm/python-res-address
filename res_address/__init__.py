@@ -24,7 +24,7 @@
 
 
 __author__ = 'Mariano Ruiz'
-__version__ = '1.0.0-b2'
+__version__ = '1.0.0'
 __license__ = 'LGPL-3'
 __url__ = 'https://github.com/mrsarm/python-res-address'
 __doc__ = """Simple Resource Address Parser."""
