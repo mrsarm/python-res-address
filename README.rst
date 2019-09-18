@@ -4,8 +4,8 @@ Simple Resource Address Parser
 Python module to parse simple network resource addresses, like the ones
 used in many database systems to represent a database URI.
 
-``res_address`` will be used by `Mongotail <https://github.com/mrsarm/mongotail>`_
-to parse the address passed through command line (migration in progress), but can be used
+``res_address`` is used by `Mongotail <https://github.com/mrsarm/mongotail>`_
+to parse the address passed through command line, but can be used
 by any other Python application that needs to parse a MongoDB database address,
 or any other network resource like ``[[HOST OR IP][:PORT]/]RESOURCE``.
 
