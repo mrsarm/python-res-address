@@ -4,8 +4,8 @@ Simple Resource Address Parser
 Python module to parse simple network resource addresses, like the ones
 used in many database systems to represent a database URI.
 
-``res_address`` is used by `Mongotail <https://github.com/mrsarm/mongotail>`_
-to parse the address passed through command line, but can be used
+Used by `Mongotail <https://github.com/mrsarm/mongotail>`_
+to parse the address passed through the command line, but can be used
 by any other Python application that needs to parse a MongoDB database address,
 or any other network resource like ``[[HOST OR IP][:PORT]/]RESOURCE``.
 
@@ -43,8 +43,8 @@ The address can be:
 +----------------------+-------------------------------------------------------------+
 
 Some validations are performed over the host, port and resource strings, and an
-exception is launched if some of the checks fails, but take into account that
-invalid range IPs or incompatible resource names may pass:
+exception is launched if some of the checks fail, but take into account that
+invalid range of IP addresses or incompatible resource names may pass:
 
 .. code:: python
 
@@ -81,6 +81,6 @@ About
 
 Project: https://github.com/mrsarm/python-res-address
 
-Authors: (2018-2019) Mariano Ruiz <mrsarm@gmail.cm>
+Authors: (2018-2021) Mariano Ruiz <mrsarm@gmail.cm>
 
 License: LGPL-3
