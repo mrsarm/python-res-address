@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #  res-address, Simple Resource Address Parser
-#  Copyright (C) 2018-2019 Mariano Ruiz
+#  Copyright (C) 2018-2022 Mariano Ruiz
 #  https://github.com/mrsarm/python-res-address
 #
 #  Author: Mariano Ruiz <mrsarm@gmail.com>
@@ -30,71 +30,110 @@ from res_address import *
 class TestAddresses(unittest.TestCase):
 
     def test_full_address(self):
-        host, port, resource = get_res_address("localhost:27017/test")
+        schema, host, port, resource = get_res_address("localhost:27017/test")
+        self.assertEqual(schema, None)
         self.assertEqual(host, 'localhost')
         self.assertEqual(port, 27017)
         self.assertEqual(resource, "test")
 
     def test_localhost_and_resource(self):
-        host, port, resource = get_res_address("localhost/test")
+        schema, host, port, resource = get_res_address("localhost/test")
+        self.assertEqual(schema, None)
+        self.assertEqual(host, 'localhost')
+        self.assertIsNone(port)
+        self.assertEqual(resource, "test")
+
+    def test_query_strings_ignored(self):
+        schema, host, port, resource = get_res_address("localhost/test?query=something&t=1")
+        self.assertEqual(schema, None)
         self.assertEqual(host, 'localhost')
         self.assertIsNone(port)
         self.assertEqual(resource, "test")
 
     def test_remotehost_and_resource(self):
-        host, port, resource = get_res_address("domain.com.ar/test")
+        schema, host, port, resource = get_res_address("domain.com.ar/test")
+        self.assertEqual(schema, None)
         self.assertEqual(host, 'domain.com.ar')
         self.assertIsNone(port)
         self.assertEqual(resource, "test")
 
     def test_only_resource(self):
-        host, port, resource = get_res_address("test")
+        schema, host, port, resource = get_res_address("test")
+        self.assertEqual(schema, None)
         self.assertIsNone(host)
         self.assertIsNone(port)
         self.assertEqual(resource, 'test')
 
     def test_full_address_with_ip(self):
-        host, port, resource = get_res_address("127.0.0.1:10001/test-prod")
+        schema, host, port, resource = get_res_address("127.0.0.1:10001/test-prod")
+        self.assertEqual(schema, None)
         self.assertEqual(host, '127.0.0.1')
         self.assertEqual(port, 10001)
         self.assertEqual(resource, "test-prod")
 
     def test_port_and_resource(self):
-        host, port, resource = get_res_address(":5000/test")
+        schema, host, port, resource = get_res_address(":5000/test")
+        self.assertEqual(schema, None)
         self.assertIsNone(host)
         self.assertEqual(port, 5000)
         self.assertEqual(resource, "test")
 
     def test_ip_and_resource(self):
-        host, port, resource = get_res_address("192.168.0.5/my_db")
+        schema, host, port, resource = get_res_address("192.168.0.5/my_db")
+        self.assertEqual(schema, None)
         self.assertEqual(host, '192.168.0.5')
         self.assertIsNone(port)
         self.assertEqual(resource, "my_db")
 
+    def test_schema_ip_and_resource(self):
+        schema, host, port, resource = get_res_address("http://192.168.0.5/my_db")
+        self.assertEqual(schema, "http")
+        self.assertEqual(host, '192.168.0.5')
+        self.assertIsNone(port)
+        self.assertEqual(resource, "my_db")
+
+    def test_schema_host_and_resource(self):
+        schema, host, port, resource = get_res_address("https://localhost/my_db")
+        self.assertEqual(schema, "https")
+        self.assertEqual(host, 'localhost')
+        self.assertIsNone(port)
+        self.assertEqual(resource, "my_db")
+
     def test_ipv6_address(self):
-        host, port, resource = get_res_address("[::10]/foo10")
+        schema, host, port, resource = get_res_address("[::10]/foo10")
+        self.assertEqual(schema, None)
         self.assertEqual(host, '[::10]')
         self.assertIsNone(port)
         self.assertEqual(resource, "foo10")
-        host, port, resource = get_res_address("[2001:0db8:0000:0000:0000:ff00:0042:8329]/foo10")
+        schema, host, port, resource = get_res_address("[2001:0db8:0000:0000:0000:ff00:0042:8329]/foo10")
         self.assertEqual(host, '[2001:0db8:0000:0000:0000:ff00:0042:8329]')
         self.assertIsNone(port)
         self.assertEqual(resource, "foo10")
 
+    def test_schema_ipv6_address(self):
+        schema, host, port, resource = get_res_address("ftp://[::10]/foo10")
+        self.assertEqual(schema, "ftp")
+        self.assertEqual(host, '[::10]')
+        self.assertIsNone(port)
+        self.assertEqual(resource, "foo10")
+
     def test_ipv6_upper_case_address(self):
-        host, port, resource = get_res_address("[2001:0DB8:0000:0000:0000:FF00:0042:8329]/TEST")
+        schema, host, port, resource = get_res_address("[2001:0DB8:0000:0000:0000:FF00:0042:8329]/TEST")
+        self.assertEqual(schema, None)
         self.assertEqual(host, '[2001:0DB8:0000:0000:0000:FF00:0042:8329]')
         self.assertIsNone(port)
         self.assertEqual(resource, "TEST")
 
     def test_ipv4_mapped_ipv6_address(self):
-        host, port, resource = get_res_address("[::ffff:192.168.89.9]/test")
+        schema, host, port, resource = get_res_address("[::ffff:192.168.89.9]/test")
+        self.assertEqual(schema, None)
         self.assertEqual(host, '[::ffff:192.168.89.9]')
         self.assertIsNone(port)
         self.assertEqual(resource, "test")
 
     def test_full_ipv6_address(self):
-        host, port, resource = get_res_address("[::1]:9999/foo")
+        schema, host, port, resource = get_res_address("[::1]:9999/foo")
+        self.assertEqual(schema, None)
         self.assertEqual(host, '[::1]')
         self.assertEqual(port, 9999)
         self.assertEqual(resource, "foo")
@@ -117,6 +156,7 @@ class TestWrongAddresses(unittest.TestCase):
     def test_not_resource(self):
         self.assertRaises(NotResourceProvidedError, get_res_address, "test/")
         self.assertRaises(NotResourceProvidedError, get_res_address, "localhost:123/")
+        self.assertRaises(NotResourceProvidedError, get_res_address, "http://host")
 
     def test_missed_port(self):
         self.assertRaises(InvalidPortError, get_res_address, "127.1.1.10:/test")
