@@ -35,16 +35,16 @@ The address can be:
 +------------------------------+-----------------------------------------------------------------+
 | 192.169.0.5:9999/foo         | foo resource on 192.168.0.5 machine on port 9999                |
 +------------------------------+-----------------------------------------------------------------+
-| http://192.169.0.5:9999/foo  |  foo resource on 192.168.0.5 machine on port 9999, schema http  |
+| http://192.169.0.5:9999/foo  | foo resource on 192.168.0.5 machine on port 9999, schema http   |
 +------------------------------+-----------------------------------------------------------------+
 | "[::1]:9999/foo"             | foo resource on ::1 machine on port 9999 (IPv6 connection)      |
 +----------------------+-------------------------------------------------------------------------+
 | :1234/foo                    | foo resource on port 1234                                       |
 +----------------------+-------------------------------------------------------------------------+
 
-Some validations are performed over the host, port and resource strings, and an
-exception is launched if some of the checks fail, but take into account that
-invalid range of IP addresses or incompatible resource names may pass:
+The only required component in the URI is the resource. Some validations are performed over the
+host, port and resource strings, and an exception is launched if some of the checks fail, but take
+into account that invalid range of IP addresses or incompatible resource names may pass:
 
 .. code:: python
 
@@ -65,8 +65,8 @@ All the validation exceptions inherit from ``AddressError``:
 Query strings passed in the address are ignored. User and password in the
 URL are not supported yet, an ``InvalidHostError`` is raised if it's the case.
 
-Run the test
-------------
+Run the tests
+-------------
 
 Just execute (Python 2.7 or 3.5+)::
 

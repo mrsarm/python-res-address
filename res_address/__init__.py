@@ -42,7 +42,7 @@ def get_res_address(address):
         http://192.169.0.5:9999/foo   foo resource on 192.168.0.5 machine on port 9999, schema http
         "[::1]:9999/foo"              foo resource on ::1 machine on port 9999 (IPv6 connection)
     :return: a tuple with ``(schema, host, port, db name)``. If one or more value aren't in the `address`
-    string, ``None`` is set in the tuple value. The resource component is required.
+    string, ``None`` is set in the tuple value. The resource component is the only one required.
     """
     host = port = resource = None
     is_ipv6 = False
