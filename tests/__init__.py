@@ -153,7 +153,7 @@ class TestWrongAddresses(unittest.TestCase):
         self.assertRaises(InvalidHostError, get_res_address, "./test")
         self.assertRaises(InvalidHostError, get_res_address, "1000/test")
 
-    def test_not_resource(self):
+    def test_no_resource(self):
         self.assertRaises(NotResourceProvidedError, get_res_address, "test/")
         self.assertRaises(NotResourceProvidedError, get_res_address, "localhost:123/")
         self.assertRaises(NotResourceProvidedError, get_res_address, "http://host")
