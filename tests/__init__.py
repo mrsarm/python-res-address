@@ -157,6 +157,7 @@ class TestWrongAddresses(unittest.TestCase):
         self.assertRaises(NotResourceProvidedError, get_res_address, "test/")
         self.assertRaises(NotResourceProvidedError, get_res_address, "localhost:123/")
         self.assertRaises(NotResourceProvidedError, get_res_address, "http://host")
+        self.assertRaises(NotResourceProvidedError, get_res_address, "http://host:1111")
 
     def test_missed_port(self):
         self.assertRaises(InvalidPortError, get_res_address, "127.1.1.10:/test")
