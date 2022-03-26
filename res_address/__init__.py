@@ -48,7 +48,7 @@ def get_res_address(address):
     host = port = resource = username = password = None
     is_ipv6 = False
     has_scheme = "://" in address
-    address_without_q, query = address.split("?", maxsplit=1) if "?" in address else (address, None)
+    address_without_q, query = address.split("?", 1) if "?" in address else (address, None)
     scheme, address_without_q_schema = address_without_q.split("://") if has_scheme else (None, address_without_q)
     if "@" in address_without_q_schema:
         match = re.match(re.compile(r"^(?P<user>[\w.\-+%!$&'()*,;=]+):(?P<pass>[\w.\-+%!$&'()*,;=]*)@(?P<address>.+)"),
