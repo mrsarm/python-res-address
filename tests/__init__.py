@@ -30,113 +30,209 @@ from res_address import *
 class TestAddresses(unittest.TestCase):
 
     def test_full_address(self):
-        scheme, host, port, resource = get_res_address("localhost:27017/test")
+        scheme, host, port, resource, query, username, password = get_res_address("localhost:27017/test")
         self.assertEqual(scheme, None)
         self.assertEqual(host, 'localhost')
         self.assertEqual(port, 27017)
         self.assertEqual(resource, "test")
+        self.assertEqual(query, None)
+        self.assertEqual(username, None)
+        self.assertEqual(password, None)
 
     def test_localhost_and_resource(self):
-        scheme, host, port, resource = get_res_address("localhost/test")
+        scheme, host, port, resource, query, username, password = get_res_address("localhost/test")
         self.assertEqual(scheme, None)
         self.assertEqual(host, 'localhost')
         self.assertIsNone(port)
         self.assertEqual(resource, "test")
+        self.assertEqual(query, None)
+        self.assertEqual(username, None)
+        self.assertEqual(password, None)
 
-    def test_query_strings_ignored(self):
-        scheme, host, port, resource = get_res_address("localhost/test?query=something&t=1")
+    def test_query_string(self):
+        scheme, host, port, resource, query, username, password = get_res_address("localhost/test?query=something&t=1")
         self.assertEqual(scheme, None)
         self.assertEqual(host, 'localhost')
         self.assertIsNone(port)
         self.assertEqual(resource, "test")
+        self.assertEqual(query, "query=something&t=1")
+        self.assertEqual(username, None)
+        self.assertEqual(password, None)
 
-    def test_remotehost_and_resource(self):
-        scheme, host, port, resource = get_res_address("domain.com.ar/test")
+    def test_remote_host_and_resource(self):
+        scheme, host, port, resource, query, username, password = get_res_address("domain.com.ar/test")
         self.assertEqual(scheme, None)
         self.assertEqual(host, 'domain.com.ar')
         self.assertIsNone(port)
         self.assertEqual(resource, "test")
+        self.assertEqual(query, None)
+        self.assertEqual(username, None)
+        self.assertEqual(password, None)
 
     def test_only_resource(self):
-        scheme, host, port, resource = get_res_address("test")
+        scheme, host, port, resource, query, username, password = get_res_address("test")
         self.assertEqual(scheme, None)
         self.assertIsNone(host)
         self.assertIsNone(port)
         self.assertEqual(resource, 'test')
+        self.assertEqual(query, None)
+        self.assertEqual(username, None)
+        self.assertEqual(password, None)
 
     def test_full_address_with_ip(self):
-        scheme, host, port, resource = get_res_address("127.0.0.1:10001/test-prod")
+        scheme, host, port, resource, query, username, password = get_res_address("127.0.0.1:10001/test-prod")
         self.assertEqual(scheme, None)
         self.assertEqual(host, '127.0.0.1')
         self.assertEqual(port, 10001)
         self.assertEqual(resource, "test-prod")
+        self.assertEqual(query, None)
+        self.assertEqual(username, None)
+        self.assertEqual(password, None)
 
     def test_port_and_resource(self):
-        scheme, host, port, resource = get_res_address(":5000/test")
+        scheme, host, port, resource, query, username, password = get_res_address(":5000/test")
         self.assertEqual(scheme, None)
         self.assertIsNone(host)
         self.assertEqual(port, 5000)
         self.assertEqual(resource, "test")
+        self.assertEqual(query, None)
+        self.assertEqual(username, None)
+        self.assertEqual(password, None)
 
     def test_ip_and_resource(self):
-        scheme, host, port, resource = get_res_address("192.168.0.5/my_db")
+        scheme, host, port, resource, query, username, password = get_res_address("192.168.0.5/my_db")
         self.assertEqual(scheme, None)
         self.assertEqual(host, '192.168.0.5')
         self.assertIsNone(port)
         self.assertEqual(resource, "my_db")
+        self.assertEqual(query, None)
+        self.assertEqual(username, None)
+        self.assertEqual(password, None)
 
     def test_scheme_ip_and_resource(self):
-        scheme, host, port, resource = get_res_address("http://192.168.0.5/my_db")
-        self.assertEqual(scheme, "http")
+        scheme, host, port, resource, query, username, password = get_res_address("mongodb://192.168.0.5/my_db")
+        self.assertEqual(scheme, "mongodb")
         self.assertEqual(host, '192.168.0.5')
         self.assertIsNone(port)
         self.assertEqual(resource, "my_db")
+        self.assertEqual(query, None)
+        self.assertEqual(username, None)
+        self.assertEqual(password, None)
 
     def test_scheme_host_and_resource(self):
-        scheme, host, port, resource = get_res_address("https://localhost/my_db")
-        self.assertEqual(scheme, "https")
+        scheme, host, port, resource, query, username, password = get_res_address("postgres://localhost/my_db")
+        self.assertEqual(scheme, "postgres")
         self.assertEqual(host, 'localhost')
         self.assertIsNone(port)
         self.assertEqual(resource, "my_db")
+        self.assertEqual(query, None)
+        self.assertEqual(username, None)
+        self.assertEqual(password, None)
 
     def test_ipv6_address(self):
-        scheme, host, port, resource = get_res_address("[::10]/foo10")
+        scheme, host, port, resource, query, username, password = get_res_address("[::10]/foo10")
         self.assertEqual(scheme, None)
         self.assertEqual(host, '[::10]')
         self.assertIsNone(port)
         self.assertEqual(resource, "foo10")
-        scheme, host, port, resource = get_res_address("[2001:0db8:0000:0000:0000:ff00:0042:8329]/foo10")
+        self.assertEqual(query, None)
+        scheme, host, port, resource, query, username, password = get_res_address("[2001:0db8:0000:0000:0000:ff00:0042:8329]/foo10")
         self.assertEqual(host, '[2001:0db8:0000:0000:0000:ff00:0042:8329]')
         self.assertIsNone(port)
         self.assertEqual(resource, "foo10")
+        self.assertEqual(query, None)
+        self.assertEqual(username, None)
+        self.assertEqual(password, None)
 
     def test_scheme_ipv6_address(self):
-        scheme, host, port, resource = get_res_address("ftp://[::10]/foo10")
+        scheme, host, port, resource, query, username, password = get_res_address("ftp://[::10]/foo10")
         self.assertEqual(scheme, "ftp")
         self.assertEqual(host, '[::10]')
         self.assertIsNone(port)
         self.assertEqual(resource, "foo10")
+        self.assertEqual(query, None)
+        self.assertEqual(username, None)
+        self.assertEqual(password, None)
 
     def test_ipv6_upper_case_address(self):
-        scheme, host, port, resource = get_res_address("[2001:0DB8:0000:0000:0000:FF00:0042:8329]/TEST")
+        scheme, host, port, resource, query, username, password = get_res_address("[2001:0DB8:0000:0000:0000:FF00:0042:8329]/TEST")
         self.assertEqual(scheme, None)
         self.assertEqual(host, '[2001:0DB8:0000:0000:0000:FF00:0042:8329]')
         self.assertIsNone(port)
         self.assertEqual(resource, "TEST")
+        self.assertEqual(query, None)
+        self.assertEqual(username, None)
+        self.assertEqual(password, None)
 
     def test_ipv4_mapped_ipv6_address(self):
-        scheme, host, port, resource = get_res_address("[::ffff:192.168.89.9]/test")
+        scheme, host, port, resource, query, username, password = get_res_address("[::ffff:192.168.89.9]/test")
         self.assertEqual(scheme, None)
         self.assertEqual(host, '[::ffff:192.168.89.9]')
         self.assertIsNone(port)
         self.assertEqual(resource, "test")
+        self.assertEqual(query, None)
+        self.assertEqual(username, None)
+        self.assertEqual(password, None)
 
     def test_full_ipv6_address(self):
-        scheme, host, port, resource = get_res_address("[::1]:9999/foo")
+        scheme, host, port, resource, query, username, password = get_res_address("[::1]:9999/foo")
         self.assertEqual(scheme, None)
         self.assertEqual(host, '[::1]')
         self.assertEqual(port, 9999)
         self.assertEqual(resource, "foo")
+        self.assertEqual(query, None)
+        self.assertEqual(username, None)
+        self.assertEqual(password, None)
+
+    def test_basic_auth(self):
+        scheme, host, port, resource, query, username, password = get_res_address("user:pass@localhost:9999/foo")
+        self.assertEqual(scheme, None)
+        self.assertEqual(host, 'localhost')
+        self.assertEqual(port, 9999)
+        self.assertEqual(resource, "foo")
+        self.assertEqual(query, None)
+        self.assertEqual(username, "user")
+        self.assertEqual(password, "pass")
+
+    def test_basic_auth_ipv4(self):
+        scheme, host, port, resource, query, username, password = get_res_address("user:pass@10.0.0.4/foo")
+        self.assertEqual(scheme, None)
+        self.assertEqual(host, '10.0.0.4')
+        self.assertEqual(port, None)
+        self.assertEqual(resource, "foo")
+        self.assertEqual(query, None)
+        self.assertEqual(username, "user")
+        self.assertEqual(password, "pass")
+
+    def test_basic_auth_ipv6(self):
+        scheme, host, port, resource, query, username, password = get_res_address("user:pass@[::1]:2222/foo")
+        self.assertEqual(scheme, None)
+        self.assertEqual(host, '[::1]')
+        self.assertEqual(port, 2222)
+        self.assertEqual(resource, "foo")
+        self.assertEqual(query, None)
+        self.assertEqual(username, "user")
+        self.assertEqual(password, "pass")
+
+    def test_user_but_password(self):
+        scheme, host, port, resource, query, username, password = get_res_address("user:@localhost:9999/foo")
+        self.assertEqual(scheme, None)
+        self.assertEqual(host, 'localhost')
+        self.assertEqual(port, 9999)
+        self.assertEqual(resource, "foo")
+        self.assertEqual(query, None)
+        self.assertEqual(username, "user")
+        self.assertEqual(password, None)
+
+    def test_full_components(self):
+        scheme, host, port, resource, query, username, password = get_res_address("mongodb+srv://user:pass@localhost:9999/foo")
+        self.assertEqual(scheme, "mongodb+srv")
+        self.assertEqual(host, 'localhost')
+        self.assertEqual(port, 9999)
+        self.assertEqual(resource, "foo")
+        self.assertEqual(query, None)
+        self.assertEqual(username, "user")
+        self.assertEqual(password, "pass")
 
 
 class TestWrongAddresses(unittest.TestCase):
@@ -152,6 +248,8 @@ class TestWrongAddresses(unittest.TestCase):
         self.assertRaises(InvalidHostError, get_res_address, "!qwerty/test")
         self.assertRaises(InvalidHostError, get_res_address, "./test")
         self.assertRaises(InvalidHostError, get_res_address, "1000/test")
+        # User and password in the URL are not supported
+        #self.assertRaises(InvalidHostError, get_res_address, "http://user:pass@host/test")
 
     def test_no_resource(self):
         self.assertRaises(NotResourceProvidedError, get_res_address, "test/")

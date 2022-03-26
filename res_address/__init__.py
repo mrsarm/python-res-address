@@ -41,23 +41,34 @@ def get_res_address(address):
         192.169.0.5:9999/foo          foo resource on 192.168.0.5 machine on port 9999
         http://192.169.0.5:9999/foo   foo resource on 192.168.0.5 machine on port 9999, scheme http
         "[::1]:9999/foo"              foo resource on ::1 machine on port 9999 (IPv6 connection)
-    :return: a tuple with ``(scheme, host, port, db name)``. If one or more value aren't in the `address`
-    string, ``None`` is set in the tuple value. The resource component is the only one required.
+        user:pass@localhost/foo       foo resource on localhost, with basic authentication
+    :return: a tuple with ``(scheme, host, port, resource, query, username, password)``. If one or more value
+    aren't in the `address` string, ``None`` is set in the tuple value. The resource component is the only one required.
     """
-    host = port = resource = None
+    host = port = resource = username = password = None
     is_ipv6 = False
     has_scheme = "://" in address
-    full_address = address.split("?")[0]
-    scheme, address = address.split("://") if has_scheme else (None, full_address)
-    if '/' in address:
-        if address.startswith("/"):
-            raise InvalidHostError('Missed host at "%s"' % address, full_address)
-        if address.endswith("/"):
-            raise NotResourceProvidedError('Missed resource at "%s"' % address, full_address)
+    address_without_q, query = address.split("?", maxsplit=1) if "?" in address else (address, None)
+    scheme, address_without_q_schema = address_without_q.split("://") if has_scheme else (None, address_without_q)
+    if "@" in address_without_q_schema:
+        match = re.match(re.compile(r"^(?P<user>[\w.\-+%!$&'()*,;=]+):(?P<pass>[\w.\-+%!$&'()*,;=]*)@(?P<address>.+)"),
+                         address_without_q_schema)
+        address_without_q_schema_auth = match['address']
+        if match['user']:
+            username = match['user']
+        if match['pass']:
+            password = match['pass']
+    else:
+        address_without_q_schema_auth = address_without_q_schema
+    if '/' in address_without_q_schema_auth:
+        if address_without_q_schema_auth.startswith("/"):
+            raise InvalidHostError('Missed host at "%s"' % address, address)
+        if address_without_q_schema_auth.endswith("/"):
+            raise NotResourceProvidedError('Missed resource at "%s"' % address, address)
         try:
-            host, resource = address.split('/')
+            host, resource = address_without_q_schema_auth.split('/')
         except ValueError:
-            raise AddressError('Invalid address "%s"' % address, full_address, resource)
+            raise AddressError('Invalid address "%s"' % address, address, resource)
         if host.startswith("[") and "]" in host:
             is_ipv6 = True
             # IPv6 address
@@ -65,38 +76,39 @@ def get_res_address(address):
                 port = host[host.index("]:")+2:]
                 host = host[:host.index("]:")+1]
             if not re.compile(r'^\[[\d:a-fA-F][\d:.a-fA-F]+\]').search(host):     # IPv6 and IPv4-mapped IPv6 addresses
-                raise InvalidHostError('Invalid host "%s"' % host, full_address, host)
+                raise InvalidHostError('Invalid host "%s"' % host, address, host)
         elif ':' in host:
             # IPv4 address
             try:
                 host, port = host.split(':')
             except ValueError:
-                raise InvalidHostError('Invalid host "%s"' % host, full_address, host)
+                raise InvalidHostError('Invalid host "%s"' % host, address, host)
         if port is not None:
             if re.compile(r'^\d{1,5}$').search(port):
                 port = int(port)
                 if port > 65535:
-                    raise InvalidPortError('Too high port number "%s"' % port, full_address, port)
+                    raise InvalidPortError('Too high port number "%s"' % port, address, port)
             else:
-                raise InvalidPortError('Invalid port number "%s"' % port, full_address, port)
+                raise InvalidPortError('Invalid port number "%s"' % port, address, port)
     else:
-        if (address.startswith("[") and address.rfind("]") > address.rfind(":")) \
-                or ":" in address or "." in address:
-            raise NotResourceProvidedError('No resource name provided in "%s"' % address, full_address)
-        resource = address
+        if (address_without_q_schema_auth.startswith("[")
+                and address_without_q_schema_auth.rfind("]") > address_without_q_schema_auth.rfind(":")) \
+                or ":" in address_without_q_schema_auth or "." in address_without_q_schema_auth:
+            raise NotResourceProvidedError('No resource name provided in "%s"' % address, address)
+        resource = address_without_q_schema_auth
     if not host:
         host = None
     else:
         if (not is_ipv6 and not re.compile(r'^\w[\w\-_.]*$').search(host)) or \
                 re.compile(r'^[0-9]+$').search(host):
-            raise InvalidHostError('Invalid host "%s"' % host, full_address, host)
+            raise InvalidHostError('Invalid host "%s"' % host, address, host)
     if not re.compile(r'^[\w\-_]+$').search(resource):
-        raise InvalidResourceError('Invalid resource "%s"' % resource, full_address, resource)
+        raise InvalidResourceError('Invalid resource "%s"' % resource, address, resource)
     if not re.compile(r'[a-zA-Z]').search(resource):    # At least one latter
-        raise InvalidResourceError('Invalid resource "%s"' % resource, full_address, resource)
+        raise InvalidResourceError('Invalid resource "%s"' % resource, address, resource)
     if scheme and not host and resource:    # The algorithm detected the host as resource
-        raise NotResourceProvidedError('Missed resource', full_address, resource)
-    return scheme, host, port, resource
+        raise NotResourceProvidedError('Missed resource', address, resource)
+    return scheme, host, port, resource, query, username, password
 
 
 #
