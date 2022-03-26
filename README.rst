@@ -14,14 +14,13 @@ Usage:
 .. code:: python
 
    >>> from res_address import get_res_address
-   >>> schema, host, port, resource = get_res_address("localhost:27017/test")
-   >>> print(schema, host, port, resource)
+   >>> scheme, host, port, resource = get_res_address("localhost:27017/test")
+   >>> print(scheme, host, port, resource)
    None localhost 27017 test
-   >>> schema, host, port, resource = get_res_address("my_db")
-   >>> print(schema, host, port, resource)
-   None None None my_db
-   >>> schema, ipv6, port, resource = get_res_address("https://[::1]:9999/foo")
-   >>> print(schema, ipv6, port, resource)
+   >>> print(get_res_address("my_db"))
+   (None, None, None, 'my_db')
+   >>> scheme, ipv6, port, resource = get_res_address("https://[::1]:9999/foo")
+   >>> print(scheme, ipv6, port, resource)
    https [::1] 9999 foo
 
 The address can be:
@@ -35,14 +34,14 @@ The address can be:
 +------------------------------+-----------------------------------------------------------------+
 | 192.169.0.5:9999/foo         | foo resource on 192.168.0.5 machine on port 9999                |
 +------------------------------+-----------------------------------------------------------------+
-| http://192.169.0.5:9999/foo  | foo resource on 192.168.0.5 machine on port 9999, schema http   |
+| http://192.169.0.5:9999/foo  | foo resource on 192.168.0.5 machine on port 9999, scheme http   |
 +------------------------------+-----------------------------------------------------------------+
 | "[::1]:9999/foo"             | foo resource on ::1 machine on port 9999 (IPv6 connection)      |
 +----------------------+-------------------------------------------------------------------------+
 | :1234/foo                    | foo resource on port 1234                                       |
 +----------------------+-------------------------------------------------------------------------+
 
-The only required component in the URI is the resource. Some validations are performed over the
+**The only required component in the URI is the resource**. Some validations are performed over the
 host, port and resource strings, and an exception is launched if some of the checks fail, but take
 into account that invalid range of IP addresses or incompatible resource names may pass:
 

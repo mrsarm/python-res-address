@@ -39,16 +39,16 @@ def get_res_address(address):
         foo                           foo resource on local machine (IPv4 connection)
         192.169.0.5/foo               foo resource on 192.168.0.5 machine
         192.169.0.5:9999/foo          foo resource on 192.168.0.5 machine on port 9999
-        http://192.169.0.5:9999/foo   foo resource on 192.168.0.5 machine on port 9999, schema http
+        http://192.169.0.5:9999/foo   foo resource on 192.168.0.5 machine on port 9999, scheme http
         "[::1]:9999/foo"              foo resource on ::1 machine on port 9999 (IPv6 connection)
-    :return: a tuple with ``(schema, host, port, db name)``. If one or more value aren't in the `address`
+    :return: a tuple with ``(scheme, host, port, db name)``. If one or more value aren't in the `address`
     string, ``None`` is set in the tuple value. The resource component is the only one required.
     """
     host = port = resource = None
     is_ipv6 = False
-    has_schema = "://" in address
+    has_scheme = "://" in address
     full_address = address.split("?")[0]
-    schema, address = address.split("://") if has_schema else (None, full_address)
+    scheme, address = address.split("://") if has_scheme else (None, full_address)
     if '/' in address:
         if address.startswith("/"):
             raise InvalidHostError('Missed host at "%s"' % address, full_address)
@@ -94,9 +94,9 @@ def get_res_address(address):
         raise InvalidResourceError('Invalid resource "%s"' % resource, full_address, resource)
     if not re.compile(r'[a-zA-Z]').search(resource):    # At least one latter
         raise InvalidResourceError('Invalid resource "%s"' % resource, full_address, resource)
-    if schema and not host and resource:    # The algorithm detected the host as resource
+    if scheme and not host and resource:    # The algorithm detected the host as resource
         raise NotResourceProvidedError('Missed resource', full_address, resource)
-    return schema, host, port, resource
+    return scheme, host, port, resource
 
 
 #
