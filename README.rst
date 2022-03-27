@@ -37,13 +37,13 @@ The address can be:
 | http://192.169.0.5:9999/foo  | foo resource on 192.168.0.5 machine on port 9999, scheme http   |
 +------------------------------+-----------------------------------------------------------------+
 | "[::1]:9999/foo"             | foo resource on ::1 machine on port 9999 (IPv6 connection)      |
-+----------------------+-------------------------------------------------------------------------+
++------------------------------+-----------------------------------------------------------------+
 | :1234/foo                    | foo resource on port 1234                                       |
 +------------------------------+-----------------------------------------------------------------+
 | user:pass@localhost/foo      | foo resource on localhost, with basic authentication            |
 +------------------------------+-----------------------------------------------------------------+
 | localhost/foo?timeout=500    | foo resource on localhost, with query string                    |
-+----------------------+-------------------------------------------------------------------------+
++------------------------------+-----------------------------------------------------------------+
 
 **The only required component in the URI is the resource**. Some validations are performed over the
 host, port and resource strings, and an exception is launched if some of the checks fail, but take
@@ -77,7 +77,7 @@ Also a URL like "localhost:123" that is a valid HTTP URL, is not as
 database URL because the "resource" (the database name) is not set.
 
 Also to get the keys and values of the query component returned by ``get_res_address()``,
-a function like ``urllib.parse.parse_qs()`` is recommended::
+a function like ``urllib.parse.parse_qs()`` is recommended:
 
 .. code:: python
 
