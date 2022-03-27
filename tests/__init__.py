@@ -174,7 +174,7 @@ class TestAddresses(unittest.TestCase):
         self.assertEqual(username, None)
         self.assertEqual(password, None)
 
-    def test_full_ipv6_address(self):
+    def test_ipv6_and_port_address(self):
         scheme, host, port, resource, query, username, password = get_res_address("[::1]:9999/foo")
         self.assertEqual(scheme, None)
         self.assertEqual(host, '[::1]')
@@ -234,6 +234,16 @@ class TestAddresses(unittest.TestCase):
         self.assertEqual(username, "user")
         self.assertEqual(password, "pass")
 
+    def test_auth_with_noalpha_chars_components(self):
+        scheme, host, port, resource, query, username, password = get_res_address("mongodb://a.b:p-.$%@localhost/test")
+        self.assertEqual(scheme, "mongodb")
+        self.assertEqual(host, 'localhost')
+        self.assertEqual(port, None)
+        self.assertEqual(resource, "test")
+        self.assertEqual(query, None)
+        self.assertEqual(username, "a.b")
+        self.assertEqual(password, "p-.$%")
+
 
 class TestWrongAddresses(unittest.TestCase):
 
@@ -287,3 +297,9 @@ class TestWrongAddresses(unittest.TestCase):
 
     def test_invalid_double_resource(self):
         self.assertRaises(AddressError, get_res_address, "localhost:123/name/secondname")
+
+    def test_invalid_auth_resource(self):
+        self.assertRaises(AddressError, get_res_address, "@localhost:123/db")
+        self.assertRaises(AddressError, get_res_address, ":@localhost:123/db")
+        self.assertRaises(AddressError, get_res_address, ":pass@localhost:123/db")
+        self.assertRaises(AddressError, get_res_address, "user@pass@localhost:123/db")

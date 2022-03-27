@@ -50,16 +50,17 @@ def get_res_address(address):
     has_scheme = "://" in address
     address_without_q, query = address.split("?", 1) if "?" in address else (address, None)
     scheme, address_without_q_schema = address_without_q.split("://") if has_scheme else (None, address_without_q)
+    address_without_q_schema_auth = address_without_q_schema
     if "@" in address_without_q_schema:
         match = re.match(re.compile(r"^(?P<user>[\w.\-+%!$&'()*,;=]+):(?P<pass>[\w.\-+%!$&'()*,;=]*)@(?P<address>.+)"),
-                         address_without_q_schema).groupdict()
-        address_without_q_schema_auth = match['address']
-        if match['user']:
-            username = match['user']
-        if match['pass']:
-            password = match['pass']
-    else:
-        address_without_q_schema_auth = address_without_q_schema
+                         address_without_q_schema)
+        if match:
+            groups = match.groupdict()
+            address_without_q_schema_auth = groups['address']
+            if groups['user']:
+                username = groups['user']
+            if groups['pass']:
+                password = groups['pass']
     if '/' in address_without_q_schema_auth:
         if address_without_q_schema_auth.startswith("/"):
             raise InvalidHostError('Missed host at "%s"' % address, address)
