@@ -224,6 +224,16 @@ class TestAddresses(unittest.TestCase):
         self.assertEqual(username, "user")
         self.assertEqual(password, None)
 
+    def test_user_but_password_and_without_separator(self):
+        scheme, host, port, resource, query, username, password = get_res_address("user@localhost:9999/foo")
+        self.assertEqual(scheme, None)
+        self.assertEqual(host, 'localhost')
+        self.assertEqual(port, 9999)
+        self.assertEqual(resource, "foo")
+        self.assertEqual(query, None)
+        self.assertEqual(username, "user")
+        self.assertEqual(password, None)
+
     def test_full_components(self):
         scheme, host, port, resource, query, username, password = get_res_address("mongodb+srv://user:pass@localhost:9999/foo")
         self.assertEqual(scheme, "mongodb+srv")
@@ -258,8 +268,6 @@ class TestWrongAddresses(unittest.TestCase):
         self.assertRaises(InvalidHostError, get_res_address, "!qwerty/test")
         self.assertRaises(InvalidHostError, get_res_address, "./test")
         self.assertRaises(InvalidHostError, get_res_address, "1000/test")
-        # User and password in the URL are not supported
-        #self.assertRaises(InvalidHostError, get_res_address, "http://user:pass@host/test")
 
     def test_no_resource(self):
         self.assertRaises(NotResourceProvidedError, get_res_address, "test/")

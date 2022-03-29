@@ -24,7 +24,7 @@
 
 
 __author__ = 'Mariano Ruiz'
-__version__ = '2.0b1'
+__version__ = '2.0b2'
 __license__ = 'LGPL-3'
 __url__ = 'https://github.com/mrsarm/python-res-address'
 __doc__ = """Simple Resource Address Parser."""
@@ -52,7 +52,7 @@ def get_res_address(address):
     scheme, address_without_q_schema = address_without_q.split("://") if has_scheme else (None, address_without_q)
     address_without_q_schema_auth = address_without_q_schema
     if "@" in address_without_q_schema:
-        match = re.match(re.compile(r"^(?P<user>[\w.\-+%!$&'()*,;=]+):(?P<pass>[\w.\-+%!$&'()*,;=]*)@(?P<address>.+)"),
+        match = re.match(re.compile(r"^(?P<user>[\w.\-+%!$&'()*,;=]+):?(?P<pass>[\w.\-+%!$&'()*,;=]*)@(?P<address>.+)"),
                          address_without_q_schema)
         if match:
             groups = match.groupdict()
