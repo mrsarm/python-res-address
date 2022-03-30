@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #  res-address, Simple Resource Address Parser
-#  Copyright (C) 2018-2019 Mariano Ruiz
+#  Copyright (C) 2018-2022 Mariano Ruiz
 #  https://github.com/mrsarm/python-res-address
 #
 #  Author: Mariano Ruiz <mrsarm@gmail.com>
@@ -24,7 +24,7 @@
 
 
 __author__ = 'Mariano Ruiz'
-__version__ = '1.0.0'
+__version__ = '2.0.0'
 __license__ = 'LGPL-3'
 __url__ = 'https://github.com/mrsarm/python-res-address'
 __doc__ = """Simple Resource Address Parser."""
@@ -36,22 +36,38 @@ import re
 def get_res_address(address):
     """
     :param address: the address, possible values are:
-        foo                   foo resource on local machine (IPv4 connection)
-        192.169.0.5/foo       foo resource on 192.168.0.5 machine
-        192.169.0.5:9999/foo  foo resource on 192.168.0.5 machine on port 9999
-        "[::1]:9999/foo"      foo resource on ::1 machine on port 9999 (IPv6 connection)
-    :return: a tuple with ``(host, port, db name)``. If one or more value aren't in the `address`
-    string, ``None`` is set in the tuple value
+        foo                           foo resource on local machine (IPv4 connection)
+        192.169.0.5/foo               foo resource on 192.168.0.5 machine
+        192.169.0.5:9999/foo          foo resource on 192.168.0.5 machine on port 9999
+        http://192.169.0.5:9999/foo   foo resource on 192.168.0.5 machine on port 9999, scheme http
+        "[::1]:9999/foo"              foo resource on ::1 machine on port 9999 (IPv6 connection)
+        user:pass@localhost/foo       foo resource on localhost, with basic authentication
+    :return: a tuple with ``(scheme, host, port, resource, query, username, password)``. If one or more value
+    aren't in the `address` string, ``None`` is set in the tuple value. The resource component is the only one required.
     """
-    host = port = resource = None
+    host = port = resource = username = password = None
     is_ipv6 = False
-    if '/' in address:
-        if address.startswith("/"):
+    has_scheme = "://" in address
+    address_without_q, query = address.split("?", 1) if "?" in address else (address, None)
+    scheme, address_without_q_schema = address_without_q.split("://") if has_scheme else (None, address_without_q)
+    address_without_q_schema_auth = address_without_q_schema
+    if "@" in address_without_q_schema:
+        match = re.match(re.compile(r"^(?P<user>[\w.\-+%!$&'()*,;=]+):?(?P<pass>[\w.\-+%!$&'()*,;=]*)@(?P<address>.+)"),
+                         address_without_q_schema)
+        if match:
+            groups = match.groupdict()
+            address_without_q_schema_auth = groups['address']
+            if groups['user']:
+                username = groups['user']
+            if groups['pass']:
+                password = groups['pass']
+    if '/' in address_without_q_schema_auth:
+        if address_without_q_schema_auth.startswith("/"):
             raise InvalidHostError('Missed host at "%s"' % address, address)
-        if address.endswith("/"):
+        if address_without_q_schema_auth.endswith("/"):
             raise NotResourceProvidedError('Missed resource at "%s"' % address, address)
         try:
-            host, resource = address.split('/')
+            host, resource = address_without_q_schema_auth.split('/')
         except ValueError:
             raise AddressError('Invalid address "%s"' % address, address, resource)
         if host.startswith("[") and "]" in host:
@@ -76,10 +92,11 @@ def get_res_address(address):
             else:
                 raise InvalidPortError('Invalid port number "%s"' % port, address, port)
     else:
-        if (address.startswith("[") and address.rfind("]") > address.rfind(":")) \
-                or ":" in address or "." in address:
+        if (address_without_q_schema_auth.startswith("[")
+                and address_without_q_schema_auth.rfind("]") > address_without_q_schema_auth.rfind(":")) \
+                or ":" in address_without_q_schema_auth or "." in address_without_q_schema_auth:
             raise NotResourceProvidedError('No resource name provided in "%s"' % address, address)
-        resource = address
+        resource = address_without_q_schema_auth
     if not host:
         host = None
     else:
@@ -90,7 +107,9 @@ def get_res_address(address):
         raise InvalidResourceError('Invalid resource "%s"' % resource, address, resource)
     if not re.compile(r'[a-zA-Z]').search(resource):    # At least one latter
         raise InvalidResourceError('Invalid resource "%s"' % resource, address, resource)
-    return host, port, resource
+    if scheme and not host and resource:    # The algorithm detected the host as resource
+        raise NotResourceProvidedError('Missed resource', address, resource)
+    return scheme, host, port, resource, query, username, password
 
 
 #
