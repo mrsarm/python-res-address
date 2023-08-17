@@ -106,6 +106,6 @@ About
 
 Project: https://github.com/mrsarm/python-res-address
 
-Authors: (2018-2022) Mariano Ruiz <mr...@gmail.cm>
+Authors: (2018-2023) Mariano Ruiz <mr...@gmail.cm>
 
 License: LGPL-3
